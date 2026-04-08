@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>现实自我问卷 · 表格结果与CSV下载</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f7;
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            padding: 2rem 1rem;
+            color: #1e2a3e;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            padding: 2rem 1.8rem 2.5rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #1e3c72, #2b4f8c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.75rem;
+        }
+
+        .instruction {
+            background: #f8fafc;
+            padding: 1rem 1.4rem;
+            border-radius: 20px;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            border-left: 5px solid #3b82f6;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        .rating-scale {
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 0.8rem 1rem;
+            margin: 1.5rem 0 1rem;
+            font-size: 0.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .scale-item {
+            background: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .demographics {
+            background: #fefce8;
+            border-radius: 24px;
+            padding: 1.2rem 1.8rem;
+            margin: 1.8rem 0 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+            border: 1px solid #fde047;
+        }
+
+        .field {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .field input, .field select {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border-radius: 16px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        .gender-group {
+            display: flex;
+            gap: 1.2rem;
+            align-items: center;
+            margin-top: 0.3rem;
+        }
+
+        .gender-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-weight: normal;
+            margin-bottom: 0;
+        }
+
+        .readonly-id {
+            background: #f1f5f9;
+            padding: 0.6rem 0.8rem;
+            border-radius: 16px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.95rem;
+            color: #1e4a76;
+            font-weight: 500;
+            cursor: default;
+        }
+
+        .questions-area {
+            margin: 1.2rem 0 1.8rem;
+        }
+
+        .question-item {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.8rem;
+            transition: background 0.1s ease;
+        }
+
+        .question-item:hover {
+            background: #fafcff;
+        }
+
+        .q-text {
+            flex: 3;
+            min-width: 200px;
+            font-size: 0.98rem;
+            font-weight: 500;
+            color: #0f172a;
+            line-height: 1.4;
+        }
+
+        .q-options {
+            flex: 2;
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .radio-option {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            background: #f9f9ff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 40px;
+        }
+
+        .radio-option input {
+            margin: 0;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #2c6e9e;
+        }
+
+        .radio-option label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: #2c3e66;
+        }
+
+        .selected-level {
+            font-size: 0.75rem;
+            color: #2c6e9e;
+            background: #eef2ff;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            white-space: nowrap;
+            font-weight: normal;
+            margin-left: 0.5rem;
+            display: inline-block;
+        }
+
+        .missing {
+            background-color: #ffe6e5;
+            border-left: 4px solid #e53e3e;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            justify-content: center;
+            margin: 2rem 0 1rem;
+        }
+
+        button {
+            background: #1e4a76;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.8rem 2rem;
+            border-radius: 60px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        button#submitBtn {
+            background: #0f3b5c;
+        }
+
+        button#submitBtn:hover {
+            background: #0a2f4a;
+            transform: scale(1.02);
+        }
+
+        button#resetBtn {
+            background: #64748b;
+        }
+
+        button#resetBtn:hover {
+            background: #475569;
+        }
+
+        .result-area {
+            margin-top: 2rem;
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 1px solid #cbd5e6;
+            display: none;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1rem 0 1rem 0;
+        }
+
+        .info-panel {
+            background: #eef2ff;
+            padding: 1rem 1.4rem;
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .info-badge {
+            background: #1e4a76;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        .answers-table-wrapper {
+            overflow-x: auto;
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .answers-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 600px;
+        }
+
+        .answers-table th {
+            background: #f1f5f9;
+            padding: 0.9rem 0.8rem;
+            text-align: left;
+            font-weight: 700;
+            color: #0c4a6e;
+            border-bottom: 2px solid #cbd5e1;
+        }
+
+        .answers-table td {
+            padding: 0.8rem 0.8rem;
+            border-bottom: 1px solid #e9edf2;
+            vertical-align: top;
+        }
+
+        .answers-table tr:hover td {
+            background-color: #fefce8;
+        }
+
+        .q-num {
+            font-weight: 700;
+            color: #1e3a8a;
+            width: 65px;
+        }
+
+        .q-text-col {
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .score-col {
+            text-align: center;
+            font-weight: 700;
+            width: 70px;
+            color: #2c3e66;
+        }
+
+        .level-col {
+            color: #2b6e4f;
+            font-weight: 500;
+            width: 150px;
+        }
+
+        .export-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-download-csv {
+            background: #2c5a7a;
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+            border-radius: 40px;
+        }
+
+        .btn-download-csv:hover {
+            background: #1f4a66;
+        }
+
+        .error-msg {
+            color: #b91c1c;
+            background: #fee2e2;
+            border-radius: 40px;
+            padding: 0.6rem 1.2rem;
+            text-align: center;
+            margin: 0.8rem 0;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.7rem;
+            color: #6c757d;
+        }
+
+        @media (max-width: 720px) {
+            .container {
+                padding: 1.2rem;
+            }
+            .question-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .answers-table th, .answers-table td {
+                padding: 0.6rem 0.4rem;
+            }
+            .info-panel {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>现实自我问卷 · 结果可下载CSV</h1>
+        <div class="instruction">
+            本问卷共有43个问题，每个问题描述的都是个人对自己的实际情况的一种看法，请您结合自己的实际，判断这些描述符合您的程度。<br>
+            所有数据仅用于学术研究，不会泄露您的个人隐私。答案没有对错或好坏之分。<br>
+            从完全不符合到完全符合，分为七个等级，按1到7记分，<br>即完全不符合——1；大部分不符合——2；基本不符合——3；部分符合&amp;部分不符合——4；基本符合——5；大部分符合——6；完全符合——7。<br>
+            对于每一个问题你只能作一种回答，敬请不要漏答！
+        </div>
+        <div class="rating-scale">
+            <span class="scale-item">1 完全不符合</span>
+            <span class="scale-item">2 大部分不符合</span>
+            <span class="scale-item">3 基本不符合</span>
+            <span class="scale-item">4 部分符合&部分不符合</span>
+            <span class="scale-item">5 基本符合</span>
+            <span class="scale-item">6 大部分符合</span>
+            <span class="scale-item">7 完全符合</span>
+        </div>
+    </div>
+
+    <!-- 人口学变量区 -->
+    <div class="demographics">
+        <div class="field">
+            <label>🧑‍🎓 被试编号（自动生成）</label>
+            <div class="readonly-id" id="participantIdDisplay">正在生成...</div>
+            <input type="hidden" id="participantId" value="">
+        </div>
+        <div class="field">
+            <label>⚧ 性别 <span style="color:#e53e3e;">*</span></label>
+            <div class="gender-group">
+                <label><input type="radio" name="gender" value="女"> 女</label>
+                <label><input type="radio" name="gender" value="男"> 男</label>
+            </div>
+        </div>
+        <div class="field">
+            <label>📅 年龄 <span style="color:#e53e3e;">*</span></label>
+            <input type="number" id="age" placeholder="周岁 (如 22)" min="12" max="100" step="1">
+        </div>
+    </div>
+
+    <!-- 问卷题目动态渲染区域（共43题） -->
+    <div class="questions-area" id="questionsContainer"></div>
+
+    <div class="action-buttons">
+        <button id="submitBtn">✅ 提交问卷 & 下载CSV</button>
+        <button id="resetBtn">🔄 清空所有选项</button>
+    </div>
+    <div id="messageArea"></div>
+    <div class="result-area" id="resultArea">
+        <!-- 动态填充表格结果 + CSV下载按钮 -->
+    </div>
+    <footer>© 综合自评问卷 | 提交后可下载CSV文件，数据可直接用Excel打开</footer>
+</div>
+
+<script>
+    // ----------------------------- 原始42个题目 ---------------------------------
+    const baseQuestions = [
+        "我处理人际关系的能力不强。",
+        "总的来说，我对自己不满意。",
+        "父母对我的期望太高。",
+        "我的睡眠质量不高。",
+        "我为人不够诚信。",
+        "我缺乏自信。",
+        "我觉得自己是个失败者。",
+        "我与老师的关系不融洽。",
+        "我感到自己没有一个好的学习习惯。",
+        "为了胜过别人，我会使用不正当的手段。",
+        "我不能胜任挑战性强的工作。",
+        "我缺乏成功所需的一些重要能力。",
+        "总得来说，我对自己的学习成绩不满意。",
+        "我缺乏责任感。",
+        "面对困难时，我感到难以克服。",
+        "我觉得前途暗淡。",
+        "和陌生人在一起时我感到很别扭。",
+        "我容易被情绪所左右。",
+        "我经常心怀恨意。",
+        "我的运动能力不强。",
+        "即使付出很大的努力也未必能做成自己想做的事。",
+        "父母不尊重我的观点。",
+        "我很难按时完成自己的学习计划。",
+        "我觉得自己的道德观念淡薄。",
+        "我不受别人的欢迎。",
+        "我对自己持否定态度。",
+        "我感到专业的学习有困难。",
+        "我感到自己值得自豪的地方不多。",
+        "我对自己所就读的大学不满意。",
+        "我的英语不好，四级考试对我来说是个障碍。",
+        "我感到自己是一个没有价值的人。",
+        "我对所学专业不满意。",
+        "我与大多数同学关系紧张。",
+        "我容易感到疲劳。",
+        "我认为自己的学习能力差。",
+        "我对家里的经济状况不满意。",
+        "我与室友很难相处。",
+        "我有知心朋友。",
+        "我的身体健康状况不佳。",
+        "我害怕在大庭广众下讲话。",
+        "我对自己的身材不满意。",
+        "一些有关“性”的想法令我感到烦恼。"
+    ];
+
+    // 认真检测题（放置在第22题，但不再校验，且表格中无特殊背景）
+    const attentionCheckItem = "请在本道题选择部分符合";
+
+    // 构建完整43题
+    const fullQuestionsList = [
+        ...baseQuestions.slice(0, 21),
+        attentionCheckItem,
+        ...baseQuestions.slice(21)
+    ];
+
+    // 等级映射
+    const levelMap = {
+        1: "完全不符合",
+        2: "大部分不符合",
+        3: "基本不符合",
+        4: "部分符合&部分不符合",
+        5: "基本符合",
+        6: "大部分符合",
+        7: "完全符合"
+    };
+
+    // 生成唯一被试编号
+    function generateParticipantId() {
+        const timestamp = Date.now();
+        const random = Math.floor(Math.random() * 10000);
+        return `P_${timestamp}_${random}`;
+    }
+
+    function initParticipantId() {
+        const id = generateParticipantId();
+        const displaySpan = document.getElementById('participantIdDisplay');
+        const hiddenInput = document.getElementById('participantId');
+        if (displaySpan) displaySpan.textContent = id;
+        if (hiddenInput) hiddenInput.value = id;
+        return id;
+    }
+
+    // 动态生成题目
+    function renderAllQuestions() {
+        const container = document.getElementById('questionsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        fullQuestionsList.forEach((qText, idx) => {
+            const qNumber = idx + 1;
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-item';
+            questionDiv.setAttribute('data-qid', qNumber);
+            
+            const textSpan = document.createElement('div');
+            textSpan.className = 'q-text';
+            textSpan.innerHTML = `<strong>${qNumber}.</strong> ${escapeHtml(qText)}`;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'q-options';
+            const nameAttr = `q_${qNumber}`;
+            for (let val = 1; val <= 7; val++) {
+                const radioWrap = document.createElement('span');
+                radioWrap.className = 'radio-option';
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = nameAttr;
+                radio.value = val;
+                radio.id = `${nameAttr}_${val}`;
+                const label = document.createElement('label');
+                label.htmlFor = `${nameAttr}_${val}`;
+                label.innerText = val;
+                radioWrap.appendChild(radio);
+                radioWrap.appendChild(label);
+                optionsDiv.appendChild(radioWrap);
+            }
+            
+            const levelSpan = document.createElement('span');
+            levelSpan.className = 'selected-level';
+            levelSpan.id = `level_${qNumber}`;
+            levelSpan.textContent = '';
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexWrap = 'wrap';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.gap = '0.8rem';
+            wrapper.style.flex = '1';
+            wrapper.appendChild(textSpan);
+            wrapper.appendChild(optionsDiv);
+            wrapper.appendChild(levelSpan);
+            questionDiv.appendChild(wrapper);
+            container.appendChild(questionDiv);
+        });
+        bindLevelDisplayOnChange();
+    }
+    
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function bindLevelDisplayOnChange() {
+        for (let i = 1; i <= fullQuestionsList.length; i++) {
+            const radios = document.querySelectorAll(`input[name="q_${i}"]`);
+            const levelSpan = document.getElementById(`level_${i}`);
+            if (!levelSpan) continue;
+            radios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const selectedVal = parseInt(e.target.value, 10);
+                    if (levelMap[selectedVal]) {
+                        levelSpan.textContent = levelMap[selectedVal];
+                    } else {
+                        levelSpan.textContent = '';
+                    }
+                    const questionDiv = document.querySelector(`.question-item[data-qid="${i}"]`);
+                    if (questionDiv) questionDiv.classList.remove('missing');
+                });
+            });
+        }
+    }
+
+    function collectAllAnswers() {
+        const answers = {};
+        let allFilled = true;
+        const missingQuestions = [];
+
+        for (let i = 1; i <= fullQuestionsList.length; i++) {
+            const radioName = `q_${i}`;
+            const selectedRadio = document.querySelector(`input[name="${radioName}"]:checked`);
+            if (selectedRadio) {
+                answers[`Q${i}`] = parseInt(selectedRadio.value, 10);
+            } else {
+                allFilled = false;
+                missingQuestions.push(i);
+                const questionDiv = document.querySelector(`.question-item[data-qid="${i}"]`);
+                if (questionDiv) questionDiv.classList.add('missing');
+            }
+        }
+        // 清除已填的高亮
+        document.querySelectorAll('.question-item').forEach(el => {
+            const qid = parseInt(el.getAttribute('data-qid'));
+            if (!missingQuestions.includes(qid)) {
+                el.classList.remove('missing');
+            }
+        });
+        return { answers, allFilled, missingQuestions };
+    }
+
+    function getDemographics() {
+        const participantId = document.getElementById('participantId')?.value.trim() || '';
+        const genderRadio = document.querySelector('input[name="gender"]:checked');
+        const gender = genderRadio ? genderRadio.value : '';
+        const ageRaw = document.getElementById('age')?.value.trim();
+        let age = null;
+        if (ageRaw !== '') age = parseInt(ageRaw, 10);
+        return { participantId, gender, age };
+    }
+
+    function validateDemographics(participantId, gender, age) {
+        if (!participantId) return { valid: false, msg: '❌ 被试编号生成失败，请刷新页面重试' };
+        if (!gender) return { valid: false, msg: '❌ 请选择性别（女/男）' };
+        if (age === null || isNaN(age)) return { valid: false, msg: '❌ 请填写有效的年龄（数字）' };
+        if (age < 12 || age > 100) return { valid: false, msg: '❌ 年龄范围应在12~100岁之间' };
+        return { valid: true, msg: '' };
+    }
+
+    function showMessage(msg, isError = true) {
+        const msgDiv = document.getElementById('messageArea');
+        if (!msgDiv) return;
+        msgDiv.innerHTML = `<div class="error-msg" style="${isError ? 'background:#fee2e2; color:#b91c1c' : 'background:#dcfce7; color:#166534'}">${msg}</div>`;
+        setTimeout(() => {
+            if (msgDiv.innerHTML.includes(msg)) {
+                setTimeout(() => { if (msgDiv.innerHTML.includes(msg)) msgDiv.innerHTML = ''; }, 4000);
+            }
+        }, 4500);
+    }
+
+    function resetAllRadios() {
+        for (let i = 1; i <= fullQuestionsList.length; i++) {
+            const radios = document.querySelectorAll(`input[name="q_${i}"]`);
+            radios.forEach(radio => radio.checked = false);
+            const levelSpan = document.getElementById(`level_${i}`);
+            if (levelSpan) levelSpan.textContent = '';
+        }
+        document.querySelectorAll('.question-item').forEach(el => el.classList.remove('missing'));
+        const msgDiv = document.getElementById('messageArea');
+        if (msgDiv) msgDiv.innerHTML = '';
+        const resultArea = document.getElementById('resultArea');
+        if (resultArea) resultArea.style.display = 'none';
+        showMessage('所有题目选项已清空，可重新填写', false);
+    }
+
+    // ---------- 生成CSV并触发下载 ----------
+    function downloadCSV(resultData, questionsList, levelDict) {
+        const metadata = resultData.metadata;
+        const responses = resultData.responses;
+        
+        // 准备CSV行数组
+        const rows = [];
+        
+        // 添加元数据行（以键值对形式，便于阅读）
+        rows.push(['被试编号', metadata.participant_id]);
+        rows.push(['性别', metadata.gender]);
+        rows.push(['年龄', metadata.age]);
+        rows.push(['完成时间', metadata.completed_at]);
+        rows.push([]); // 空行分隔
+        
+        // 表头
+        rows.push(['题号', '题目内容', '评分(1-7)', '等级描述']);
+        
+        // 每个题目的数据
+        for (let i = 0; i < questionsList.length; i++) {
+            const qNum = i + 1;
+            const qText = questionsList[i];
+            const score = responses[`Q${qNum}`];
+            const levelText = levelDict[score] || '';
+            rows.push([qNum, qText, score, levelText]);
+        }
+        
+        // 转换为CSV字符串（处理逗号、引号、换行）
+        const csvContent = rows.map(row => {
+            return row.map(cell => {
+                if (cell === undefined || cell === null) cell = '';
+                const str = String(cell);
+                // 如果包含逗号、换行或双引号，则用双引号包裹并转义内部双引号
+                if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+                    return '"' + str.replace(/"/g, '""') + '"';
+                }
+                return str;
+            }).join(',');
+        }).join('\n');
+        
+        // 添加BOM用于支持中文UTF-8
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute('download', `问卷结果_${metadata.participant_id}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    // 展示表格，并提供CSV下载按钮（自动下载一次 + 按钮手动下载）
+    // 注意：第22题不再有任何特殊背景色
+    function renderResultWithCSV(resultData, questionsList, levelDict) {
+        const resultArea = document.getElementById('resultArea');
+        if (!resultArea) return;
+        resultArea.style.display = 'block';
+        resultArea.innerHTML = '';
+        
+        const metadata = resultData.metadata;
+        const responses = resultData.responses;
+        
+        // 构建表格HTML（所有行样式统一，无特殊背景）
+        let tableRows = '';
+        for (let i = 0; i < questionsList.length; i++) {
+            const qNum = i + 1;
+            const qText = questionsList[i];
+            const score = responses[`Q${qNum}`];
+            const levelText = levelDict[score] || '未选择';
+            tableRows += `
+                <tr>
+                    <td class="q-num" style="text-align:center;">${qNum}</td>
+                    <td class="q-text-col">${escapeHtml(qText)}</td>
+                    <td class="score-col" style="text-align:center;">${score}</td>
+                    <td class="level-col">${levelText}</td>
+                </tr>
+            `;
+        }
+        
+        const html = `
+            <div class="result-card">
+                <div class="info-panel">
+                    <div><span class="info-badge">🧪 被试编号</span> <strong>${escapeHtml(metadata.participant_id)}</strong></div>
+                    <div><span class="info-badge">⚧ 性别</span> ${metadata.gender}</div>
+                    <div><span class="info-badge">📅 年龄</span> ${metadata.age} 岁</div>
+                    <div><span class="info-badge">📅 完成时间</span> ${new Date(metadata.completed_at).toLocaleString()}</div>
+                    <div><span class="info-badge">✅ 状态</span> 已完整提交</div>
+                </div>
+                <div class="answers-table-wrapper">
+                    <table class="answers-table">
+                        <thead>
+                            <tr><th>题号</th><th>题目内容</th><th>评分 (1-7)</th><th>等级描述</th></tr>
+                        </thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+                </div>
+                <div class="export-actions">
+                    <button id="downloadCsvBtn" class="btn-download-csv">📥 下载CSV文件</button>
+                </div>
+                <div style="font-size:0.7rem; margin-top:0.8rem; text-align:right; color:#4b5563;">共${questionsList.length}题，CSV可直接用Excel打开</div>
+            </div>
+        `;
+        resultArea.innerHTML = html;
+        
+        // 绑定CSV下载按钮事件
+        const downloadBtn = document.getElementById('downloadCsvBtn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                downloadCSV(resultData, questionsList, levelDict);
+                showMessage('CSV文件开始下载', false);
+            });
+        }
+        
+        // 自动触发一次下载
+        downloadCSV(resultData, questionsList, levelDict);
+        showMessage('✅ 问卷已提交，CSV文件已自动下载。可点击按钮再次下载。', false);
+    }
+    
+    // 提交主逻辑（无认真度校验）
+    function onSubmit() {
+        const { participantId, gender, age } = getDemographics();
+        const demoValid = validateDemographics(participantId, gender, age);
+        if (!demoValid.valid) {
+            showMessage(demoValid.msg, true);
+            return;
+        }
+
+        const { answers, allFilled, missingQuestions } = collectAllAnswers();
+        if (!allFilled) {
+            const missingStr = missingQuestions.join(', ');
+            showMessage(`📌 尚有 ${missingQuestions.length} 道题目未作答 (题号: ${missingStr})，请完成所有题目后再提交。`, true);
+            const firstMissing = document.querySelector(`.question-item[data-qid="${missingQuestions[0]}"]`);
+            if (firstMissing) firstMissing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        const seriousAnswer = answers['Q22']; // 仅记录，不校验
+        const timestamp = new Date().toISOString();
+        const resultData = {
+            metadata: {
+                participant_id: participantId,
+                gender: gender,
+                age: age,
+                completed_at: timestamp,
+                total_items: 43,
+                serious_item_value: seriousAnswer,
+                serious_item_number: 22
+            },
+            responses: answers,
+            validation: {
+                all_questions_answered: true
+            }
+        };
+        
+        renderResultWithCSV(resultData, fullQuestionsList, levelMap);
+        const resultAreaElem = document.getElementById('resultArea');
+        if (resultAreaElem) resultAreaElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function init() {
+        initParticipantId();
+        renderAllQuestions();
+        const ageInput = document.getElementById('age');
+        if (ageInput) {
+            ageInput.addEventListener('input', function(e) {
+                let val = parseInt(e.target.value, 10);
+                if (e.target.value !== '' && (isNaN(val) || val < 12 || val > 100)) {
+                    e.target.setCustomValidity('请输入12~100之间的年龄');
+                } else {
+                    e.target.setCustomValidity('');
+                }
+            });
+        }
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        if (submitBtn) submitBtn.addEventListener('click', onSubmit);
+        if (resetBtn) resetBtn.addEventListener('click', resetAllRadios);
+    }
+    
+    init();
+</script>
+</body>
+</html>
